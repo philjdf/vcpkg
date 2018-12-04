@@ -93,7 +93,13 @@ namespace vcpkg
 
     const fs::path& VcpkgPaths::get_tool_exe(const std::string& tool) const
     {
-        return this->tool_paths.get_lazy(tool, [&]() { return Commands::Fetch::get_tool_path(*this, tool); });
+        if (!m_tool_cache) m_tool_cache = get_tool_cache();
+        return m_tool_cache->get_tool_path(*this, tool);
+    }
+    const std::string& VcpkgPaths::get_tool_version(const std::string& tool) const
+    {
+        if (!m_tool_cache) m_tool_cache = get_tool_cache();
+        return m_tool_cache->get_tool_version(*this, tool);
     }
 
     const Toolset& VcpkgPaths::get_toolset(const Build::PreBuildInfo& prebuildinfo) const
@@ -131,8 +137,8 @@ namespace vcpkg
 
         if (tsv && vsp)
         {
-            Util::stable_keep_if(
-                candidates, [&](const Toolset* t) { return *tsv == t->version && *vsp == t->visual_studio_root_path; });
+            Util::erase_remove_if(
+                candidates, [&](const Toolset* t) { return *tsv != t->version || *vsp != t->visual_studio_root_path; });
             Checks::check_exit(VCPKG_LINE_INFO,
                                !candidates.empty(),
                                "Could not find Visual Studio instance at %s with %s toolset.",
@@ -145,7 +151,7 @@ namespace vcpkg
 
         if (tsv)
         {
-            Util::stable_keep_if(candidates, [&](const Toolset* t) { return *tsv == t->version; });
+            Util::erase_remove_if(candidates, [&](const Toolset* t) { return *tsv != t->version; });
             Checks::check_exit(
                 VCPKG_LINE_INFO, !candidates.empty(), "Could not find Visual Studio instance with %s toolset.", *tsv);
         }
@@ -153,8 +159,8 @@ namespace vcpkg
         if (vsp)
         {
             const fs::path vs_root_path = *vsp;
-            Util::stable_keep_if(candidates,
-                                 [&](const Toolset* t) { return vs_root_path == t->visual_studio_root_path; });
+            Util::erase_remove_if(candidates,
+                                  [&](const Toolset* t) { return vs_root_path != t->visual_studio_root_path; });
             Checks::check_exit(VCPKG_LINE_INFO,
                                !candidates.empty(),
                                "Could not find Visual Studio instance at %s.",

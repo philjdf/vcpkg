@@ -328,27 +328,28 @@ if ($disableMetrics)
 }
 
 $platform = "x86"
-$vcpkgReleaseDir = "$vcpkgSourcesPath\release"
+$vcpkgReleaseDir = "$vcpkgSourcesPath\msbuild.x86.release"
 
 if ($win64)
 {
     $architecture=(Get-WmiObject win32_operatingsystem | Select-Object osarchitecture).osarchitecture
-    if ($architecture -ne "64-bit")
+    if (-not $architecture -like "*64*")
     {
         throw "Cannot build 64-bit on non-64-bit system"
     }
 
     $platform = "x64"
-    $vcpkgReleaseDir = "$vcpkgSourcesPath\x64\release"
+    $vcpkgReleaseDir = "$vcpkgSourcesPath\msbuild.x64.release"
 }
 
 $arguments = (
 "`"/p:VCPKG_VERSION=-nohash`"",
 "`"/p:DISABLE_METRICS=$disableMetricsValue`"",
-"/p:Configuration=release",
+"/p:Configuration=Release",
 "/p:Platform=$platform",
 "/p:PlatformToolset=$platformToolset",
 "/p:TargetPlatformVersion=$windowsSDK",
+"/p:PreferredToolArchitecture=x64",
 "/verbosity:minimal",
 "/m",
 "/nologo",
@@ -387,5 +388,6 @@ Write-Host "`nBuilding vcpkg.exe... done.`n"
 
 Write-Verbose("Placing vcpkg.exe in the correct location")
 
-Copy-Item "$vcpkgReleaseDir\vcpkg.exe" "$vcpkgRootDir\vcpkg.exe" | Out-Null
-Copy-Item "$vcpkgReleaseDir\vcpkgmetricsuploader.exe" "$vcpkgRootDir\scripts\vcpkgmetricsuploader.exe" | Out-Null
+Copy-Item "$vcpkgReleaseDir\vcpkg.exe" "$vcpkgRootDir\vcpkg.exe"
+Copy-Item "$vcpkgReleaseDir\vcpkgmetricsuploader.exe" "$vcpkgRootDir\scripts\vcpkgmetricsuploader.exe"
+Remove-Item "$vcpkgReleaseDir" -Force -Recurse -ErrorAction SilentlyContinue
