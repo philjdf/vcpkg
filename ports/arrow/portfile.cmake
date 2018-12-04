@@ -6,10 +6,10 @@ endif()
 
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
-    REPO apache/arrow
-    REF apache-arrow-0.11.1
-    SHA512 8a2de7e4b40666e4ea7818fac488549f1348e961e7cb6a4166ae4019976a574fd115dc1cabaf44bc1cbaabf15fb8e5133c8232b34fca250d8ff7c5b65c5407c8
-    HEAD_REF master
+    REPO philjdf/arrow
+    REF 1dd7cdf1411b8f4a66f417d9d42f746a67f75586
+    SHA512 dca9bc346ed2d989187d90ea39154b8ae88cec11dbef453e9edbf6e0802463b1832768c77ae1333f6828712d0e82032a07cd5392fd50cb2562e6971dc4c01dac
+    HEAD_REF InheritableHandlesFixBackpatched
 )
 
 set(CPP_SOURCE_PATH "${SOURCE_PATH}/cpp")
